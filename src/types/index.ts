@@ -1,13 +1,12 @@
-// =============================================================================
-// src/types/index.ts
-// Shared TypeScript types — single source of truth for the entire app.
-//
-// DB types (Product, Order, OrderItem) are inferred from Drizzle schema and
-// re-exported here so components don't need to import from src/db/schema directly.
-// ==============================================================================
+/*
+ * src/types/index.ts
+ * Shared TypeScript types — single source of truth for the entire app.
+ *
+ * DB types (Product, Order, OrderItem) are inferred from the Drizzle schema and
+ * re-exported here so components don't need to import from src/db/schema directly.
+ */
 
-// Import DB-inferred types locally (needed for use within this file)
-// and re-export them as the single source of truth for the whole app.
+/* Import DB-inferred types locally (needed for use within this file) and re-export. */
 import type {
     NewOrder,
     NewOrderItem,
@@ -26,14 +25,9 @@ export type {
     Product,
 };
 
-// ---------------------------------------------------------------------------
-// Cart types — client-side only, not persisted to the database
-// ---------------------------------------------------------------------------
+/* Cart types — client-side only, not persisted to the database */
 
-/**
- * A product as displayed in the storefront catalog.
- * Matches the Product DB type but some fields are required for UI display.
- */
+/** A product as displayed in the storefront catalog. */
 export interface CartProduct {
     id: string; // UUID from Supabase
     name: string;
@@ -49,9 +43,7 @@ export interface CartItem extends CartProduct {
     quantity: number;
 }
 
-// ---------------------------------------------------------------------------
-// Order submission types — used in the createOrder server action
-// ---------------------------------------------------------------------------
+/* Order submission types — used in the createOrder server action */
 
 export interface OrderItemInput {
     productId: string; // UUID
@@ -64,9 +56,7 @@ export interface CreateOrderInput {
     items: OrderItemInput[];
 }
 
-// ---------------------------------------------------------------------------
-// Admin types — used in admin dashboard components
-// ---------------------------------------------------------------------------
+/* Admin types */
 
 export type PaymentStatus = "unpaid" | "paid" | "cancelled";
 

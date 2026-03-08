@@ -1,10 +1,10 @@
 "use client";
 
-// =============================================================================
-// src/app/admin/login/page.tsx
-// Admin login — Supabase email + password authentication
-// No self-registration. Admin account is created in Supabase Auth dashboard.
-// =============================================================================
+/*
+ * src/app/admin/login/page.tsx
+ * Admin login — Supabase email + password authentication.
+ * No self-registration. Admin accounts are created in the Supabase Auth dashboard.
+ */
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -53,7 +53,6 @@ export default function AdminLoginPage() {
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <div className="w-full max-w-sm">
-                {/* Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-bold text-foreground">Admin Login</h1>
                     <p className="text-sm text-muted-foreground mt-2">
@@ -61,7 +60,6 @@ export default function AdminLoginPage() {
                     </p>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <label

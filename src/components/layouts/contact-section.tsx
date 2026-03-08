@@ -8,7 +8,7 @@ const contactPersons = [
   {
     name: "Panitia",
     phone: "62xxx",
-    role: "Panitia",
+    role: "Panitia PO",
   },
 ];
 

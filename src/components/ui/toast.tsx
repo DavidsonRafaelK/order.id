@@ -1,10 +1,9 @@
 "use client";
 
-// =============================================================================
-// src/components/ui/toast.tsx
-// Toast notification system — context provider + UI components.
-// Fixed: React import moved to top of file.
-// =============================================================================
+/*
+ * src/components/ui/toast.tsx
+ * Toast notification system — context provider + accessible UI components.
+ */
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CheckCircle, AlertCircle, X } from "lucide-react";
@@ -17,10 +16,6 @@ export interface Toast {
   duration?: number;
 }
 
-interface ToastProviderProps {
-  children: React.ReactNode;
-}
-
 interface ToastContextType {
   toasts: Toast[];
   addToast: (toast: Omit<Toast, "id">) => void;
@@ -29,7 +24,7 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export function ToastProvider({ children }: ToastProviderProps) {
+export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const removeToast = (id: string) => {
@@ -40,7 +35,6 @@ export function ToastProvider({ children }: ToastProviderProps) {
     const id = Math.random().toString(36).substring(2, 9);
     const newToast = { ...toast, id };
     setToasts((prev) => [...prev, newToast]);
-
     const duration = toast.duration ?? 5000;
     setTimeout(() => removeToast(id), duration);
   };
@@ -71,7 +65,11 @@ function ToastContainer({
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-[9999] space-y-2 max-w-sm" role="status" aria-live="polite">
+    <div
+      className="fixed top-4 right-4 z-[9999] space-y-2 max-w-sm"
+      role="status"
+      aria-live="polite"
+    >
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
       ))}
@@ -117,10 +115,7 @@ function ToastItem({
       className={`
         ${styles[toast.type]}
         border rounded-lg p-4 shadow-lg transition-all duration-150 ease-out
-        ${isVisible
-          ? "transform translate-x-0 opacity-100"
-          : "transform translate-x-full opacity-0"
-        }
+        ${isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
       `}
     >
       <div className="flex items-start gap-3">

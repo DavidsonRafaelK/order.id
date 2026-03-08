@@ -1,17 +1,15 @@
 "use client";
 
-// =============================================================================
-// src/components/ui/cart.tsx
-// Shopping cart UI — floating button + cart dialog + order form modal.
-//
-// Security & UX fixes applied (FX-01):
-// - WhatsApp URL built BEFORE the async createOrder() call (fixes popup blocker)
-// - If createOrder() throws, WhatsApp is NOT opened — user sees error toast
-// - Duplicate code refactored into helpers (resetAfterOrder)
-// - Form labels now linked to inputs via htmlFor/id (a11y fix)
-// - FAB has aria-label (a11y fix)
-// - Order form uses design system tokens (no more raw gray-* colors)
-// =============================================================================
+/*
+ * src/components/ui/cart.tsx
+ * Shopping cart UI — floating button + cart dialog + order form modal.
+ *
+ * Key design decisions:
+ * - WhatsApp URL built BEFORE the async createOrder() call (fixes popup blocker)
+ * - If createOrder() throws, WhatsApp is NOT opened — user sees error toast
+ * - Form labels linked to inputs via htmlFor/id for accessibility
+ * - Order form uses design system tokens (no raw Tailwind color classes)
+ */
 
 import { useState, useEffect, useMemo } from "react";
 import { ShoppingCart, Plus, Minus, Trash2, MessageCircle } from "lucide-react";
@@ -33,12 +31,8 @@ import { createOrder } from "@/app/actions/orders";
 const CONTACT_PERSON = {
   name: "Panitia",
   phone: "62xxx",
-  role: "Panitia",
+  role: "Panitia PO",
 };
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function buildWhatsAppUrl(params: {
   contactName: string;
@@ -53,10 +47,6 @@ function buildWhatsAppUrl(params: {
   return `https://wa.me/${contactPhone}?text=${encodeURIComponent(message)}`;
 }
 
-// ---------------------------------------------------------------------------
-// Cart Component
-// ---------------------------------------------------------------------------
-
 export function Cart() {
   const [isOpen, setIsOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -67,7 +57,6 @@ export function Cart() {
   const { addToast } = useToast();
   const { items, updateQuantity, removeFromCart, clearCart } = useCart();
 
-  // Memoize computed values directly from items to avoid exhaustive-deps warning
   const totalPrice = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [items]
@@ -77,7 +66,6 @@ export function Cart() {
     [items]
   );
 
-  // Auto-save customer data to localStorage for convenience
   useEffect(() => {
     try {
       const savedData = localStorage.getItem("lektor-customer-data");
@@ -87,7 +75,7 @@ export function Cart() {
         if (phone) setCustomerPhone(phone);
       }
     } catch {
-      // Silently ignore localStorage errors
+      /* Silently ignore localStorage errors */
     }
   }, []);
 
@@ -99,7 +87,7 @@ export function Cart() {
           JSON.stringify({ name: customerName, phone: customerPhone })
         );
       } catch {
-        // Silently ignore localStorage errors
+        /* Silently ignore localStorage errors */
       }
     }
   }, [customerName, customerPhone]);
@@ -143,17 +131,15 @@ export function Cart() {
     try {
       localStorage.removeItem("lektor-customer-data");
     } catch {
-      // ignore
+      /* ignore */
     }
   };
 
   const handleOrder = async () => {
-    if (items.length === 0) return;
-    if (!validateForm()) return;
+    if (items.length === 0 || !validateForm()) return;
 
     setIsSubmitting(true);
 
-    // Build order details string for WhatsApp message
     const orderDetails = items
       .map(
         (item) =>
@@ -161,9 +147,10 @@ export function Cart() {
       )
       .join("\n");
 
-    // ⚠️  Build the WhatsApp URL SYNCHRONOUSLY before any async operation.
-    // Browsers block window.open() called after await — this is the fix for
-    // the popup blocker bug identified in the security audit.
+    /*
+     * Build the WhatsApp URL SYNCHRONOUSLY before any async operation.
+     * Browsers block window.open() called after await — this fixes the popup blocker bug.
+     */
     const whatsappUrl = buildWhatsAppUrl({
       contactName: CONTACT_PERSON.name,
       contactPhone: CONTACT_PERSON.phone,
@@ -174,8 +161,6 @@ export function Cart() {
     });
 
     try {
-      // Submit order to Supabase via Server Action
-      // Prices are fetched from the DB server-side — we only send product IDs
       await createOrder({
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
@@ -191,18 +176,17 @@ export function Cart() {
         description: "Data pesanan telah disimpan dan akan dikirim ke WhatsApp",
       });
 
-      // Only open WhatsApp AFTER the order is successfully saved to the DB
+      /* Only open WhatsApp AFTER the order is successfully saved to the DB. */
       window.open(whatsappUrl, "_blank");
       resetAfterOrder();
     } catch (error) {
-      // createOrder() threw — do NOT open WhatsApp
+      /* createOrder() threw — do NOT open WhatsApp. */
       const message = error instanceof Error ? error.message : "Terjadi kesalahan tak dikenal.";
       addToast({
         type: "error",
         title: "Gagal Menyimpan Pesanan",
         description: message,
       });
-      // Do not reset form or open WhatsApp — let user retry
     } finally {
       setIsSubmitting(false);
     }
@@ -234,7 +218,6 @@ export function Cart() {
             </DialogTitle>
           </DialogHeader>
 
-          {/* Cart Items */}
           <div className="flex-1 overflow-y-auto min-h-0 px-4 sm:px-6">
             {items.length === 0 ? (
               <div className="text-center py-8 sm:py-12 space-y-4">
@@ -252,7 +235,6 @@ export function Cart() {
                   <Card key={item.id} className="overflow-hidden">
                     <CardContent className="p-3 sm:p-4">
                       <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                        {/* Use next/image for optimization */}
                         <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0">
                           <Image
                             src={item.imageUrl || "/images/fallback.jpg"}
@@ -315,7 +297,6 @@ export function Cart() {
             )}
           </div>
 
-          {/* Total & Order Button */}
           {items.length > 0 && (
             <div className="border-t bg-muted/30 p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
@@ -341,7 +322,7 @@ export function Cart() {
         </DialogContent>
       </Dialog>
 
-      {/* Order Form Modal — uses design system tokens, Radix Dialog for a11y */}
+      {/* Order Form Modal */}
       <Dialog open={showOrderForm} onOpenChange={(open) => {
         if (!open && !isSubmitting) {
           setShowOrderForm(false);
@@ -360,7 +341,6 @@ export function Cart() {
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto space-y-6 py-4">
-            {/* Nama Input — label linked via htmlFor/id (a11y fix) */}
             <div className="space-y-2">
               <label
                 htmlFor="customer-name"
@@ -393,7 +373,6 @@ export function Cart() {
               )}
             </div>
 
-            {/* Phone Input — label linked via htmlFor/id (a11y fix) */}
             <div className="space-y-2">
               <label
                 htmlFor="customer-phone"
@@ -427,7 +406,6 @@ export function Cart() {
               )}
             </div>
 
-            {/* Order Summary */}
             <div className="bg-muted border border-border rounded-xl p-5 space-y-3">
               <h4 className="font-semibold text-foreground text-base">Ringkasan Pesanan</h4>
               <div className="space-y-2 text-sm">
@@ -449,7 +427,6 @@ export function Cart() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="space-y-3 pt-2 border-t">
             <Button
               onClick={handleOrder}

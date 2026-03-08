@@ -1,10 +1,10 @@
 "use client";
 
-// =============================================================================
-// src/components/admin/realtime-orders.tsx
-// Realtime order feed — subscribes to live Supabase postgres_changes.
-// Used on both the dashboard (feed) and orders page (table).
-// =============================================================================
+/*
+ * src/components/admin/realtime-orders.tsx
+ * Live order feed — subscribes to Supabase postgres_changes.
+ * Used on the dashboard overview page.
+ */
 
 import { useToast } from "@/components/ui/toast";
 import { useRealtimeOrders } from "@/hooks/useRealtimeOrders";
@@ -24,10 +24,7 @@ function formatRp(amount: number) {
     return `Rp ${amount.toLocaleString("id-ID")}`;
 }
 
-const statusConfig: Record<
-    PaymentStatus,
-    { label: string; className: string }
-> = {
+const statusConfig: Record<PaymentStatus, { label: string; className: string }> = {
     unpaid: { label: "Belum Bayar", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
     paid: { label: "Lunas", className: "bg-green-100 text-green-800 border-green-200" },
     cancelled: { label: "Dibatalkan", className: "bg-red-100 text-red-800 border-red-200" },
@@ -37,43 +34,34 @@ function StatusBadge({ status }: { status: string | null }) {
     const s = (status ?? "unpaid") as PaymentStatus;
     const config = statusConfig[s] ?? statusConfig.unpaid;
     return (
-        <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}
-        >
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}>
             {config.label}
         </span>
     );
 }
 
-interface OrderRowProps {
+function OrderRow({
+    order,
+    isNew,
+    onMarkRead,
+}: {
     order: Order;
     isNew: boolean;
     onMarkRead: (id: string) => void;
-}
-
-function OrderRow({ order, isNew, onMarkRead }: OrderRowProps) {
+}) {
     const { addToast } = useToast();
 
     const handleStatusChange = async (newStatus: PaymentStatus) => {
         try {
             await updatePaymentStatus(order.id, newStatus);
         } catch {
-            addToast({
-                type: "error",
-                title: "Gagal mengubah status",
-                description: "Coba lagi.",
-            });
+            addToast({ type: "error", title: "Gagal mengubah status", description: "Coba lagi." });
         }
     };
 
-    const whatsappUrl = `https://wa.me/${order.customerPhone}`;
-
     return (
         <tr
-            className={`border-b transition-colors ${isNew
-                    ? "bg-primary/5 animate-pulse-once"
-                    : "hover:bg-muted/50"
-                }`}
+            className={`border-b transition-colors ${isNew ? "bg-primary/5" : "hover:bg-muted/50"}`}
             onClick={() => isNew && onMarkRead(order.id)}
         >
             <td className="px-4 py-3">
@@ -84,7 +72,7 @@ function OrderRow({ order, isNew, onMarkRead }: OrderRowProps) {
                     <div>
                         <p className="font-medium text-sm text-foreground">{order.customerName}</p>
                         <a
-                            href={whatsappUrl}
+                            href={`https://wa.me/${order.customerPhone}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-xs text-muted-foreground hover:text-primary transition-colors"
@@ -112,8 +100,8 @@ function OrderRow({ order, isNew, onMarkRead }: OrderRowProps) {
                             onClick={() => handleStatusChange(s)}
                             disabled={order.paymentStatus === s}
                             className={`text-xs px-2 py-1 rounded border transition-colors ${order.paymentStatus === s
-                                    ? "bg-muted text-muted-foreground cursor-default"
-                                    : "hover:bg-muted text-foreground"
+                                ? "bg-muted text-muted-foreground cursor-default"
+                                : "hover:bg-muted text-foreground"
                                 }`}
                             title={`Ubah ke: ${statusConfig[s].label}`}
                         >
@@ -121,7 +109,7 @@ function OrderRow({ order, isNew, onMarkRead }: OrderRowProps) {
                         </button>
                     ))}
                     <a
-                        href={whatsappUrl}
+                        href={`https://wa.me/${order.customerPhone}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs px-2 py-1 rounded border hover:bg-muted transition-colors text-foreground"
@@ -135,24 +123,19 @@ function OrderRow({ order, isNew, onMarkRead }: OrderRowProps) {
     );
 }
 
-interface RealtimeOrderFeedProps {
-    initialOrders: Order[];
-}
-
-export function RealtimeOrderFeed({ initialOrders }: RealtimeOrderFeedProps) {
+export function RealtimeOrderFeed({ initialOrders }: { initialOrders: Order[] }) {
     const { addToast } = useToast();
 
-    const { orders, newOrderIds, markOrderAsRead, markAllAsRead } =
-        useRealtimeOrders({
-            initialOrders,
-            onNewOrder: (order) => {
-                addToast({
-                    type: "success",
-                    title: "Order Baru! 🔔",
-                    description: `${order.customerName} — ${formatRp(order.totalAmount)}`,
-                });
-            },
-        });
+    const { orders, newOrderIds, markOrderAsRead, markAllAsRead } = useRealtimeOrders({
+        initialOrders,
+        onNewOrder: (order) => {
+            addToast({
+                type: "success",
+                title: "Order Baru!",
+                description: `${order.customerName} — ${formatRp(order.totalAmount)}`,
+            });
+        },
+    });
 
     if (orders.length === 0) {
         return (
@@ -170,10 +153,7 @@ export function RealtimeOrderFeed({ initialOrders }: RealtimeOrderFeedProps) {
                     <p className="text-sm font-medium text-primary">
                         {newOrderIds.size} order baru masuk
                     </p>
-                    <button
-                        onClick={markAllAsRead}
-                        className="text-xs text-primary hover:underline"
-                    >
+                    <button onClick={markAllAsRead} className="text-xs text-primary hover:underline">
                         Tandai semua dibaca
                     </button>
                 </div>

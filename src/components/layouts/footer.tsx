@@ -38,7 +38,7 @@ export default function Footer() {
                   <span className="text-sm font-medium">Kontak Person</span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-2 text-center sm:text-left">
-                  <p>+62 xxx-xxxx-xxxx (Panitia)</p>
+                  <p>Hubungi panitia via WhatsApp</p>
                 </div>
               </div>
             </div>

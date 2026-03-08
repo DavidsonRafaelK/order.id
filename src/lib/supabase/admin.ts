@@ -1,14 +1,12 @@
-// =============================================================================
-// src/lib/supabase/admin.ts
-// Service-role Supabase client — PRIVILEGED, bypasses Row Level Security.
-//
-// ⚠️  NEVER import this file in Client Components or expose to the browser.
-// ⚠️  Only use in Server Actions or protected API routes.
-//
-// Used for:
-// - Admin operations (update payment status, manage products)
-// - Operations that must bypass RLS policies
-// =============================================================================
+/*
+ * src/lib/supabase/admin.ts
+ * Service-role Supabase client — PRIVILEGED, bypasses Row Level Security.
+ *
+ * ⚠️  NEVER import this file in Client Components or expose to the browser.
+ * ⚠️  Only use in Server Actions or protected API routes.
+ *
+ * Used for admin operations that must bypass RLS policies.
+ */
 
 import { createClient } from "@supabase/supabase-js";
 

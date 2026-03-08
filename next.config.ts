@@ -1,11 +1,18 @@
 import type { NextConfig } from "next";
 
+/*
+ * next.config.ts
+ * Next.js configuration — image settings and HTTP security headers.
+ */
+
 const nextConfig: NextConfig = {
-  // All product images are stored locally in /public — no external image hostnames needed.
-  // The previous wildcard hostname (**) has been removed as it was a security risk (SEC-03).
+  /*
+   * All product images are stored locally in /public — no external image
+   * hostnames needed. The previous wildcard hostname (**) has been removed
+   * as it was a security risk.
+   */
   images: {},
 
-  // HTTP Security Headers (SEC-07)
   async headers() {
     return [
       {

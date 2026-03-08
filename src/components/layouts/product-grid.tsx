@@ -1,14 +1,12 @@
-// =============================================================================
-// src/components/layouts/product-grid.tsx
-// Server Component — fetches products from Supabase via Drizzle.
-// No "use client" directive — this runs on the server.
-// =============================================================================
+/*
+ * src/components/layouts/product-grid.tsx
+ * Server Component — fetches products from Supabase via Drizzle on each request.
+ */
 
 import { getProducts } from "@/app/actions/products";
 import { ProductCard } from "@/components/layouts/product-card";
 
 export async function ProductGrid() {
-  // Server-side fetch — no loading state needed, Next.js handles SSR streaming
   const products = await getProducts();
 
   if (products.length === 0) {
@@ -26,7 +24,6 @@ export async function ProductGrid() {
 
   return (
     <section className="space-y-12">
-      {/* Section Header */}
       <div className="text-center space-y-4">
         <h2 className="text-4xl font-black tracking-tight">
           Menu Pilihan Kami
@@ -37,14 +34,12 @@ export async function ProductGrid() {
         </p>
       </div>
 
-      {/* Product Count */}
       <div className="text-center">
         <p className="text-muted-foreground">
           Menampilkan semua {products.length} menu
         </p>
       </div>
 
-      {/* Product Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {products.map((product) => (
           <ProductCard

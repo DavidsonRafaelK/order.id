@@ -1,23 +1,17 @@
 "use server";
 
-// =============================================================================
-// src/app/actions/admin.ts
-// Server Actions for admin operations — requires an authenticated admin session.
-// All functions here must ONLY be called from protected admin routes.
-// =============================================================================
+/*
+ * src/app/actions/admin.ts
+ * Server Actions for admin operations — requires an authenticated admin session.
+ * All functions here must ONLY be called from protected admin routes.
+ */
 
 import { db } from "@/db";
 import { orders, products } from "@/db/schema";
 import type { NewProduct, PaymentStatus } from "@/types";
 import { desc, eq } from "drizzle-orm";
 
-// ---------------------------------------------------------------------------
-// Order management
-// ---------------------------------------------------------------------------
-
-/**
- * Fetch the latest N orders for the admin dashboard feed.
- */
+/** Fetch the latest N orders for the admin dashboard feed. */
 export async function getRecentOrders(limit = 50) {
     return db
         .select()
@@ -46,10 +40,7 @@ export async function updatePaymentStatus(
     return updated;
 }
 
-/**
- * Revenue summary for the admin dashboard cards.
- * Uses a single query + JS aggregation to avoid multiple round-trips.
- */
+/** Revenue summary for the admin dashboard cards. */
 export async function getRevenueSummary() {
     const allOrders = await db
         .select({
@@ -77,28 +68,18 @@ export async function getRevenueSummary() {
     return { paidRevenue, unpaidRevenue, todayCount, pendingCount };
 }
 
-// ---------------------------------------------------------------------------
-// Product management
-// ---------------------------------------------------------------------------
-
-/**
- * Fetch all products including unavailable ones (admin view).
- */
+/** Fetch all products including unavailable ones (admin view). */
 export async function getAllProducts() {
     return db.select().from(products).orderBy(products.createdAt);
 }
 
-/**
- * Create a new product.
- */
+/** Create a new product. */
 export async function createProduct(data: Omit<NewProduct, "id" | "createdAt">) {
     const [created] = await db.insert(products).values(data).returning();
     return created;
 }
 
-/**
- * Update an existing product.
- */
+/** Update an existing product. */
 export async function updateProduct(
     id: string,
     data: Partial<Omit<NewProduct, "id" | "createdAt">>
@@ -111,11 +92,8 @@ export async function updateProduct(
     return updated;
 }
 
-/**
- * Toggle a product's availability — one-click enable/disable in the admin UI.
- */
+/** Toggle a product's availability — one-click enable/disable in the admin UI. */
 export async function toggleProductAvailability(id: string) {
-    // Fetch current state first
     const [product] = await db
         .select({ isAvailable: products.isAvailable })
         .from(products)

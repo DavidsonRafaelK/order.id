@@ -1,9 +1,9 @@
 "use client";
 
-// =============================================================================
-// src/components/admin/sidebar.tsx
-// Admin sidebar — desktop navigation + logout button
-// =============================================================================
+/*
+ * src/components/admin/sidebar.tsx
+ * Admin sidebar — desktop navigation with active state + logout button.
+ */
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -28,13 +28,11 @@ export function AdminSidebar({ userEmail }: { userEmail: string }) {
 
     return (
         <aside className="hidden md:flex w-64 flex-col fixed inset-y-0 left-0 bg-card border-r z-30">
-            {/* Brand */}
             <div className="px-6 py-6 border-b">
                 <h1 className="text-lg font-bold text-foreground">PO Galang Dana</h1>
                 <p className="text-xs text-muted-foreground mt-1">Admin Panel</p>
             </div>
 
-            {/* Navigation */}
             <nav className="flex-1 px-3 py-4 space-y-1" aria-label="Admin navigasi">
                 {navItems.map((item) => {
                     const isActive = item.exact
@@ -57,7 +55,6 @@ export function AdminSidebar({ userEmail }: { userEmail: string }) {
                 })}
             </nav>
 
-            {/* User + Logout */}
             <div className="px-3 py-4 border-t space-y-2">
                 <p className="text-xs text-muted-foreground px-3 truncate">{userEmail}</p>
                 <button

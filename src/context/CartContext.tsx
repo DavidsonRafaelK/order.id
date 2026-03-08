@@ -1,10 +1,9 @@
 "use client";
 
-// =============================================================================
-// src/context/CartContext.tsx
-// Client-side shopping cart state — in-memory only, not persisted to DB.
-// Uses CartProduct from shared types (string UUID ids).
-// =============================================================================
+/*
+ * src/context/CartContext.tsx
+ * Client-side shopping cart state — in-memory only, not persisted to DB.
+ */
 
 import { createContext, useContext, useState, type ReactNode } from "react";
 import type { CartItem, CartProduct } from "@/types";

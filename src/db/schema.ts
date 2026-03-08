@@ -1,8 +1,8 @@
-// =============================================================================
-// src/db/schema.ts
-// Drizzle ORM schema — single source of truth for the Supabase database.
-// All monetary values are stored as integers (Indonesian Rupiah, no decimals).
-// =============================================================================
+/*
+ * src/db/schema.ts
+ * Drizzle ORM schema — single source of truth for the Supabase database.
+ * All monetary values are stored as integers (Indonesian Rupiah, no decimals).
+ */
 
 import {
     boolean,
@@ -13,9 +13,7 @@ import {
     uuid,
 } from "drizzle-orm/pg-core";
 
-// ---------------------------------------------------------------------------
-// products — the catalog of items for sale in the pre-order system
-// ---------------------------------------------------------------------------
+/* Products — the catalog of items for sale in the pre-order system */
 export const products = pgTable("products", {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
@@ -29,9 +27,7 @@ export const products = pgTable("products", {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
-// ---------------------------------------------------------------------------
-// orders — one record per customer checkout
-// ---------------------------------------------------------------------------
+/* Orders — one record per customer checkout */
 export const orders = pgTable("orders", {
     id: uuid("id").primaryKey().defaultRandom(),
     customerName: text("customer_name").notNull(),
@@ -47,11 +43,11 @@ export const orders = pgTable("orders", {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
-// ---------------------------------------------------------------------------
-// order_items — individual line items for each order
-// Product name and price are snapshotted at order time so historical data
-// remains accurate even if the product is later updated or removed.
-// ---------------------------------------------------------------------------
+/*
+ * Order Items — individual line items for each order.
+ * Product name and price are snapshotted at order time so historical data
+ * remains accurate even if the product is later updated or removed.
+ */
 export const orderItems = pgTable("order_items", {
     id: uuid("id").primaryKey().defaultRandom(),
     orderId: uuid("order_id")
@@ -64,10 +60,10 @@ export const orderItems = pgTable("order_items", {
     subtotal: integer("subtotal").notNull(), // productPrice * quantity (IDR)
 });
 
-// ---------------------------------------------------------------------------
-// Inferred TypeScript types — use these throughout the app instead of
-// manually defining interfaces. Import from "@/db/schema".
-// ---------------------------------------------------------------------------
+/*
+ * Inferred TypeScript types — use these throughout the app instead of
+ * manually defining interfaces. Import from "@/db/schema".
+ */
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
 export type Order = typeof orders.$inferSelect;

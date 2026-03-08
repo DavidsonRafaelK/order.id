@@ -1,9 +1,10 @@
 "use client";
 
-// =============================================================================
-// src/components/admin/orders-table.tsx
-// Full-featured orders table with filter, search, sort + Realtime
-// =============================================================================
+/*
+ * src/components/admin/orders-table.tsx
+ * Full-featured orders table with filter by status, search by name/phone,
+ * sortable columns, one-click status updates, and Supabase Realtime.
+ */
 
 import { useState, useMemo } from "react";
 import { useRealtimeOrders } from "@/hooks/useRealtimeOrders";
@@ -20,6 +21,7 @@ const STATUS_LABELS: Record<PaymentStatus, string> = {
 function formatRp(n: number) {
     return `Rp ${n.toLocaleString("id-ID")}`;
 }
+
 function formatDate(d: Date | null | string) {
     if (!d) return "—";
     return new Intl.DateTimeFormat("id-ID", {
@@ -83,9 +85,7 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
 
     return (
         <div className="space-y-4">
-            {/* Filter bar */}
             <div className="flex flex-col sm:flex-row gap-3">
-                {/* Status filter tabs */}
                 <div className="flex gap-1 border rounded-lg p-1 bg-muted w-fit">
                     {(["all", "unpaid", "paid", "cancelled"] as const).map((s) => (
                         <button
@@ -101,7 +101,6 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
                     ))}
                 </div>
 
-                {/* Search */}
                 <input
                     type="search"
                     value={search}
@@ -112,7 +111,6 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
                 />
             </div>
 
-            {/* Table */}
             <div className="bg-card border rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -146,9 +144,7 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
                                 filtered.map((order) => (
                                     <tr
                                         key={order.id}
-                                        className={`border-b transition-colors ${newOrderIds.has(order.id)
-                                                ? "bg-primary/5"
-                                                : "hover:bg-muted/50"
+                                        className={`border-b transition-colors ${newOrderIds.has(order.id) ? "bg-primary/5" : "hover:bg-muted/50"
                                             }`}
                                     >
                                         <td className="px-4 py-3">

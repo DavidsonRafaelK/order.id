@@ -1,10 +1,9 @@
 "use client";
 
-// =============================================================================
-// src/components/admin/product-form.tsx
-// Product list + add/edit modal for the admin products page.
-// Handles creating and editing products via Server Actions.
-// =============================================================================
+/*
+ * src/components/admin/product-form.tsx
+ * Product list + add/edit modal for the admin /products page.
+ */
 
 import { useState, useTransition } from "react";
 import {
@@ -14,11 +13,7 @@ import {
 } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import type { Product } from "@/types";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+import type { NewProduct, Product } from "@/types";
 
 function formatRp(amount: number) {
     return `Rp ${amount.toLocaleString("id-ID")}`;
@@ -31,23 +26,19 @@ function parseRpInput(raw: string): number {
     return isNaN(num) ? 0 : num;
 }
 
-/** Format integer → human-readable for input display, e.g. 50000 → "50.000" */
+/** Format integer → Rupiah display string, e.g. 50000 → "50.000" */
 function formatRpInput(amount: number): string {
     if (amount === 0) return "";
     return amount.toLocaleString("id-ID");
 }
 
-// ---------------------------------------------------------------------------
-// Product Form (Add / Edit)
-// ---------------------------------------------------------------------------
-
 interface ProductFormData {
     name: string;
     description: string;
-    priceInput: string; // display string with dots, e.g. "50.000"
+    priceInput: string;
     imageUrl: string;
     category: string;
-    stockInput: string; // empty = unlimited
+    stockInput: string;
     isNew: boolean;
     isAvailable: boolean;
 }
@@ -76,13 +67,15 @@ function productToFormData(product: Product): ProductFormData {
     };
 }
 
-interface ProductFormModalProps {
+function ProductFormModal({
+    editingProduct,
+    onClose,
+    onSaved,
+}: {
     editingProduct: Product | null;
     onClose: () => void;
     onSaved: (product: Product) => void;
-}
-
-function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModalProps) {
+}) {
     const { addToast } = useToast();
     const [isPending, startTransition] = useTransition();
     const [form, setForm] = useState<ProductFormData>(
@@ -94,7 +87,6 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
         setForm((prev) => ({ ...prev, [field]: value }));
 
     const handlePriceChange = (raw: string) => {
-        // Allow only digits and formatting chars while typing
         const digits = raw.replace(/[^\d]/g, "");
         const num = parseInt(digits, 10);
         const formatted = !isNaN(num) ? num.toLocaleString("id-ID") : "";
@@ -114,7 +106,7 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
         e.preventDefault();
         if (!validate()) return;
 
-        const data = {
+        const data: Omit<NewProduct, "id" | "createdAt"> = {
             name: form.name.trim(),
             description: form.description.trim() || null,
             price: parseRpInput(form.priceInput),
@@ -127,12 +119,10 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
 
         startTransition(async () => {
             try {
-                let saved: Product;
-                if (editingProduct) {
-                    saved = await updateProduct(editingProduct.id, data);
-                } else {
-                    saved = await createProduct(data);
-                }
+                const saved = editingProduct
+                    ? await updateProduct(editingProduct.id, data)
+                    : await createProduct(data);
+
                 addToast({
                     type: "success",
                     title: editingProduct ? "Produk diperbarui" : "Produk ditambahkan",
@@ -155,23 +145,19 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
         }`;
 
     return (
-        // Backdrop
         <div
             className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
             onClick={(e) => e.target === e.currentTarget && onClose()}
         >
             <div className="w-full max-w-lg bg-card rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-                {/* Header */}
                 <div className="px-6 py-5 border-b">
                     <h2 className="text-lg font-bold text-foreground">
                         {editingProduct ? "Edit Produk" : "Tambah Produk Baru"}
                     </h2>
                 </div>
 
-                {/* Scrollable body */}
                 <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
                     <div className="px-6 py-5 space-y-5">
-                        {/* Nama */}
                         <div className="space-y-1.5">
                             <label htmlFor="prod-name" className="block text-sm font-medium text-foreground">
                                 Nama Produk <span className="text-destructive">*</span>
@@ -187,7 +173,6 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
                             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                         </div>
 
-                        {/* Deskripsi */}
                         <div className="space-y-1.5">
                             <label htmlFor="prod-desc" className="block text-sm font-medium text-foreground">
                                 Deskripsi
@@ -202,15 +187,12 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
                             />
                         </div>
 
-                        {/* Harga */}
                         <div className="space-y-1.5">
                             <label htmlFor="prod-price" className="block text-sm font-medium text-foreground">
                                 Harga (IDR) <span className="text-destructive">*</span>
                             </label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                                    Rp
-                                </span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Rp</span>
                                 <input
                                     id="prod-price"
                                     type="text"
@@ -226,7 +208,6 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
                             )}
                         </div>
 
-                        {/* Kategori + Stok (side by side) */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <label htmlFor="prod-category" className="block text-sm font-medium text-foreground">
@@ -243,7 +224,7 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
                             </div>
                             <div className="space-y-1.5">
                                 <label htmlFor="prod-stock" className="block text-sm font-medium text-foreground">
-                                    Stok <span className="text-xs text-muted-foreground">(kosong = unlimited)</span>
+                                    Stok <span className="text-xs text-muted-foreground">(kosong = ∞)</span>
                                 </label>
                                 <input
                                     id="prod-stock"
@@ -257,7 +238,6 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
                             </div>
                         </div>
 
-                        {/* URL Gambar */}
                         <div className="space-y-1.5">
                             <label htmlFor="prod-image" className="block text-sm font-medium text-foreground">
                                 URL Gambar
@@ -271,11 +251,10 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
                                 className={inputClass()}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Untuk gambar lokal: letakkan file di folder <code>/public</code> dan tulis path-nya (contoh: <code>/macaroni-schotel.jpeg</code>).
+                                Untuk gambar lokal: letakkan di <code>/public</code> dan tulis path-nya (contoh: <code>/macaroni-schotel.jpeg</code>).
                             </p>
                         </div>
 
-                        {/* Toggles */}
                         <div className="flex flex-col gap-3 pt-1">
                             <label className="flex items-center gap-3 cursor-pointer">
                                 <input
@@ -298,7 +277,6 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
                         </div>
                     </div>
 
-                    {/* Footer */}
                     <div className="px-6 py-4 border-t flex gap-3 justify-end">
                         <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
                             Batal
@@ -309,11 +287,7 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
                                     <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
                                     Menyimpan...
                                 </span>
-                            ) : editingProduct ? (
-                                "Simpan Perubahan"
-                            ) : (
-                                "Tambah Produk"
-                            )}
+                            ) : editingProduct ? "Simpan Perubahan" : "Tambah Produk"}
                         </Button>
                     </div>
                 </form>
@@ -322,10 +296,6 @@ function ProductFormModal({ editingProduct, onClose, onSaved }: ProductFormModal
     );
 }
 
-// ---------------------------------------------------------------------------
-// Products Manager (list + modal orchestration)
-// ---------------------------------------------------------------------------
-
 export function ProductsManager({ initialProducts }: { initialProducts: Product[] }) {
     const { addToast } = useToast();
     const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -333,31 +303,18 @@ export function ProductsManager({ initialProducts }: { initialProducts: Product[
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [togglingId, setTogglingId] = useState<string | null>(null);
 
-    const handleOpenAdd = () => {
-        setEditingProduct(null);
-        setShowModal(true);
-    };
-
-    const handleOpenEdit = (product: Product) => {
-        setEditingProduct(product);
-        setShowModal(true);
-    };
-
-    const handleClose = () => {
-        setShowModal(false);
-        setEditingProduct(null);
-    };
+    const handleOpenAdd = () => { setEditingProduct(null); setShowModal(true); };
+    const handleOpenEdit = (product: Product) => { setEditingProduct(product); setShowModal(true); };
+    const handleClose = () => { setShowModal(false); setEditingProduct(null); };
 
     const handleSaved = (savedProduct: Product) => {
         setProducts((prev) => {
             const existing = prev.findIndex((p) => p.id === savedProduct.id);
             if (existing >= 0) {
-                // Update in-place
                 const next = [...prev];
                 next[existing] = savedProduct;
                 return next;
             }
-            // Prepend new product
             return [savedProduct, ...prev];
         });
         handleClose();
@@ -367,9 +324,7 @@ export function ProductsManager({ initialProducts }: { initialProducts: Product[
         setTogglingId(product.id);
         try {
             const updated = await toggleProductAvailability(product.id);
-            setProducts((prev) =>
-                prev.map((p) => (p.id === updated.id ? updated : p))
-            );
+            setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
             addToast({
                 type: "success",
                 title: updated.isAvailable ? "Produk diaktifkan" : "Produk dinonaktifkan",
@@ -384,12 +339,10 @@ export function ProductsManager({ initialProducts }: { initialProducts: Product[
 
     return (
         <>
-            {/* Action bar */}
             <div className="flex justify-end">
                 <Button onClick={handleOpenAdd}>+ Tambah Produk</Button>
             </div>
 
-            {/* Products table */}
             <div className="bg-card border rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -421,12 +374,8 @@ export function ProductsManager({ initialProducts }: { initialProducts: Product[
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3 font-semibold text-foreground">
-                                            {formatRp(product.price)}
-                                        </td>
-                                        <td className="px-4 py-3 text-muted-foreground">
-                                            {product.category ?? "—"}
-                                        </td>
+                                        <td className="px-4 py-3 font-semibold text-foreground">{formatRp(product.price)}</td>
+                                        <td className="px-4 py-3 text-muted-foreground">{product.category ?? "—"}</td>
                                         <td className="px-4 py-3 text-muted-foreground">
                                             {product.stock != null ? product.stock : "∞"}
                                         </td>
@@ -469,7 +418,6 @@ export function ProductsManager({ initialProducts }: { initialProducts: Product[
                 </div>
             </div>
 
-            {/* Modal */}
             {showModal && (
                 <ProductFormModal
                     editingProduct={editingProduct}
